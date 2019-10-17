@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="tbLanguageMapper" >
+	
+	<select id="findListPage" resultType="tblanguage"  parameterType="dto">
+		SELECT 	
+			  s.id,
+			  s.name,
+			  s.code,
+			  s.baseFee,
+			  DATE_FORMAT(s.createDate,'%Y-%m-%d %H:%i:%s') createDate,
+			  s.state,
+			  s.remark,
+			  s.userid
+		 from tb_language s
+		where s.delete_status=0
+		<if test="queryCondition.name != null and queryCondition.name != ''">
+				<![CDATA[ and s.name like CONCAT(CONCAT('%',#{queryCondition.name}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.level != null and queryCondition.level != ''">
+				and s.level=#{queryCondition.level}
+	    </if>
+	    <if test="queryCondition.status != null and queryCondition.status != ''">
+				and s.state=#{queryCondition.status}
+	    </if>
+	    order by s.createDate desc 
+	</select>
+	
+	<select id="findById" resultType="tblanguage"  parameterType="long">
+		SELECT 	s.*
+			FROM tb_language s 
+			where s.id=#{id} and s.delete_status=0
+	</select>
+	
+	<insert id="save" parameterType="tblanguage" 
+				useGeneratedKeys="true" keyProperty="id">
+			INSERT INTO tb_language
+	            (
+	             name,
+	             code,
+	             baseFee,
+	             createDate,
+	             state,
+	             remark,
+	             userid,
+	             delete_status)
+				VALUES (
+				        #{name},
+				        #{code},
+				        #{baseFee},
+				        now(),
+				        #{state},
+				        #{remark},
+				        #{userid},
+				        0);
+	</insert>
+	
+	<update id="update" parameterType="tblanguage">
+		UPDATE tb_language
+					SET 
+					  name = #{name},
+					  code = #{code},
+					  baseFee = #{baseFee},
+					  updateDate = now(),
+					  state = #{state},
+					  remark = #{remark}
+					WHERE id = #{id,jdbcType=BIGINT}
+	</update>
+	
+	<update id="updateNetpointstatus" parameterType="map">
+		update tb_language set state=#{status} where id=#{id}
+	</update>
+	
+	<update id="updateDelStatus" parameterType="long">
+		update tb_language set delete_status=1 where id=#{id}
+	</update>
+	
+	<select id="languageIsExist" resultType="java.lang.Integer" 
+						parameterType="java.lang.String">
+		select count(*) from tb_language s where s.name=#{username} 
+				and s.delete_status=0
+	</select>
+	
+</mapper>

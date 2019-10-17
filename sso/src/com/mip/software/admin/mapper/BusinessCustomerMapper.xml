@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="businessCustomerMapper" >
+
+	<select id="findListPage" resultType="businessCustomer"  parameterType="dto">
+		SELECT 	s.*,
+		        p.branchshopname,
+		        r.ssouser_name,
+		        t.ssouser_name maintainuser,
+		        u.ssouser_name ywuser
+		FROM ckb_business_customer s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_sys_branchshop p on s.branchshopid=p.branchshopid
+		left join ckb_front_user t on s.maintainfrontid=t.ssouserid
+		left join ckb_front_user u on s.ywfrontid=u.ssouserid
+		where 1=1
+		<if test="queryCondition.customername != null and queryCondition.customername != ''">
+				<![CDATA[ and s.customername like CONCAT(CONCAT('%',#{queryCondition.customername}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.tracestart != null and queryCondition.tracestart != ''">
+				and s.ctracktime>=#{queryCondition.tracestart}
+	    </if>
+	    <if test="queryCondition.traceend != null and queryCondition.traceend != ''">
+				and s.ctracktime &lt;=#{queryCondition.traceend}
+	    </if>
+	    <if test="queryCondition.contractstart != null and queryCondition.contractstart != ''">
+				and s.conractendtime>=#{queryCondition.contractstart}
+	    </if>
+	    <if test="queryCondition.contractend != null and queryCondition.contractend != ''">
+				and s.conractendtime &lt;=#{queryCondition.contractend}
+	    </if>
+	    <if test="queryCondition.branchshopid != null and queryCondition.branchshopid != ''">
+				and s.branchshopid=#{queryCondition.branchshopid}
+	    </if>
+	    <if test="queryCondition.customertype != null and queryCondition.customertype != ''">
+				and s.customertype=#{queryCondition.customertype}
+	    </if>
+	    order by s.customerid desc 
+	</select>
+	
+	<select id="findList" resultType="businessCustomer" parameterType="map">
+		SELECT 	s.*,
+		        p.branchshopname
+		FROM ckb_business_customer s
+		left join ckb_sys_branchshop p on s.branchshopid=p.branchshopid
+		where 1=1
+		 <if test="customername != null and  customername != ''">
+			<![CDATA[ and s.customername like CONCAT(CONCAT('%',#{customername}),'%') ]]>	
+		 </if>
+		<if test="branchshopid != null and branchshopid != ''">
+			<![CDATA[ AND s.branchshopid=#{branchshopid} ]]>
+		 </if>
+		 <if test="customertype != null and customertype != ''">
+			<![CDATA[ AND s.customertype=#{customertype} ]]>
+		 </if>
+		 order by s.customerid desc 
+	</select>
+	
+	<select id="getDistinctCustomerList" resultType="String" parameterType="String">
+		SELECT 	GROUP_CONCAT(s.customerid) 
+		FROM ckb_business_customer s
+		where find_in_set(s.customerid,#{customers})
+		 
+	</select>
+	
+	
+	<select id="getSelectCountOf" resultType="java.lang.Integer" parameterType="map">
+		select count(*) from ckb_business_changinfo s
+		  where FIND_IN_SET(s.changinfoid,#{changeids})
+     	       and s.customerid=#{customerid}
+		 
+	</select>
+	
+	<select id="findChangeList" resultType="businessCustomer" parameterType="map">
+		select 
+		 distinct s.customerid,
+		 p.customername,
+		 p.customeraddress,
+		 (select count(*) from ckb_business_changinfo r where r.customerid=s.customerid and r.changinfotype in(1,3,4,5,6,8) and r.changestatus=#{changestatus} and r.isfast=1) isfast,
+		 (select count(*) from ckb_business_changinfo r where r.customerid=s.customerid and r.changinfotype in(1,3,4,5,6,8) and r.changestatus=#{changestatus}) changenum
+		from ckb_business_changinfo s
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="changestatus != null and changestatus != ''">
+				and s.changestatus=#{changestatus}
+	    </if>
+	    <if test="nocludeids != null and nocludeids != ''">
+				and FIND_IN_SET(s.changinfoid , (select case when group_concat(f.changinfoids) is not null then group_concat(f.changinfoids) else 0 end from ckb_business_translate f where f.isfinish=0 and f.branchshopid=#{branchshopid}) )=0
+	    </if>
+	    <if test="translateid != null and translateid != ''">
+				and FIND_IN_SET(s.changinfoid , (select f.changinfoids from ckb_business_translate f where f.translateid=#{translateid}) )
+	    </if>
+		 order by s.changinfoid desc 
+	</select>
+	
+	
+	<select id="findPsList" resultType="businessCustomer" parameterType="map">
+		select 
+		 distinct s.customerid,
+		 p.customername,
+		 p.customeraddress
+		from ckb_business_changinfo s
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="translateid != null and translateid != ''">
+				and FIND_IN_SET(s.changinfoid , (select f.changinfoids from ckb_business_translate f where f.translateid=#{translateid}) )
+	    </if>
+		 order by s.changinfoid desc 
+	</select>
+	
+	
+	
+	
+	<select id="findById" resultType="businessCustomer"  parameterType="long">
+		SELECT 	s.*,
+		        p.branchshopname
+		FROM ckb_business_customer s
+		left join ckb_sys_branchshop p on s.branchshopid=p.branchshopid
+		where  s.customerid=#{customerid} 
+	</select>
+	
+	
+	<insert id="save" parameterType="businessCustomer" 
+				useGeneratedKeys="true" keyProperty="customerid">
+		INSERT INTO ckb_business_customer
+            	( customername,
+		             customeraddress,
+		             customergis,
+		             customertype,
+		             frontuserid,
+		             adddate,
+		             branchshopid,
+		             customerlink,
+		             customertel,
+		             maintainfrontid,
+		             ywfrontid
+		             )
+		VALUES (
+		        #{customername},
+		        #{customeraddress},
+		        #{customergis},
+		        #{customertype},
+		        #{frontuserid},
+		        now(),
+		        #{branchshopid},
+		        #{customerlink},
+		        #{customertel},
+		        #{maintainfrontid},
+		        #{ywfrontid}
+		        )
+	</insert>
+	
+	<update id="update" parameterType="businessCustomer">
+		update ckb_business_customer
+		<set>
+			<if test="customername != null and customername != ''">
+				customername=#{customername,jdbcType=VARCHAR},
+			</if>
+			<if test="customeraddress != null and customeraddress != ''">
+				customeraddress=#{customeraddress,jdbcType=VARCHAR},
+			</if>
+			<if test="customergis != null and customergis != ''">
+				customergis=#{customergis,jdbcType=VARCHAR},
+			</if>
+			<if test="customertype != null and customertype !='' ">
+				customertype=#{customertype,jdbcType=INTEGER},
+			</if>
+			<if test="frontuserid != null and frontuserid !='' ">
+				frontuserid=#{frontuserid,jdbcType=INTEGER},
+			</if>
+			<if test="customerlink != null and customerlink != ''">
+				customerlink=#{customerlink,jdbcType=VARCHAR},
+			</if>
+			<if test="customertel != null and customertel != ''">
+				customertel=#{customertel,jdbcType=VARCHAR},
+			</if>
+			<if test="conractendtime != null and conractendtime != ''">
+				conractendtime=#{conractendtime,jdbcType=VARCHAR},
+			</if>
+			<if test="ctracktime != null and ctracktime != ''">
+				ctracktime=#{ctracktime,jdbcType=VARCHAR},
+			</if>
+			<if test="maintainfrontid != null and maintainfrontid !='' ">
+				maintainfrontid=#{maintainfrontid,jdbcType=INTEGER},
+			</if>
+			<if test="ywfrontid != null and ywfrontid !='' ">
+				ywfrontid=#{ywfrontid,jdbcType=INTEGER},
+			</if>
+		</set>
+		where customerid=#{customerid,jdbcType=INTEGER}	
+	</update>
+	
+	<delete id="del" parameterType="long">
+		delete from ckb_business_customer where customerid=#{customerid}
+	</delete>
+	
+</mapper>

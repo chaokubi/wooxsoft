@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="businessCleaseMapper" >
+
+	
+	<select id="findListPage" resultType="businessClease"  parameterType="dto">
+		SELECT 	s.*,
+		        p.customername,
+		        r.modelname,
+		        t.productName,
+		        u.productName penqi
+		FROM ckb_business_clease s
+		left join ckb_business_customer p on s.customerid=p.customerid
+		left join ckb_product_model r on s.modelid=r.modelid
+		left join ckb_product_product t on r.productid=t.productid
+		left join ckb_product_product u on u.productid=s.penqiid
+		where 1=1
+		<if test="queryCondition.customername != null and queryCondition.customername != ''">
+				<![CDATA[ and p.customername like CONCAT(CONCAT('%',#{queryCondition.customername}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.cleasestatus != null and queryCondition.cleasestatus != ''">
+				and s.cleasestatus=#{queryCondition.cleasestatus}
+	    </if>
+	    <if test="queryCondition.branchshopid != null and queryCondition.branchshopid != ''">
+				and s.branchshopid=#{queryCondition.branchshopid}
+	    </if>
+	    <if test="queryCondition.customerid != null and queryCondition.customerid != ''">
+				and s.customerid=#{queryCondition.customerid}
+	    </if>
+	    <if test="queryCondition.penqitype != null and queryCondition.penqitype != ''">
+				and s.penqitype=#{queryCondition.penqitype}
+	    </if>
+	    order by s.cleaseid desc 
+	</select>
+	
+	<select id="findList" resultType="businessClease" parameterType="map">
+		SELECT 	s.*,
+		        p.customername,
+		        r.modelname,
+		        t.productName,
+		        u.productName penqi
+		FROM ckb_business_clease s
+		left join ckb_business_customer p on s.customerid=p.customerid
+		left join ckb_product_model r on s.modelid=r.modelid
+		left join ckb_product_product t on r.productid=t.productid
+		left join ckb_product_product u on u.productid=s.penqiid
+		where 1=1
+		 <if test="customername != null and  customername != ''">
+			<![CDATA[ and p.customername like CONCAT(CONCAT('%',#{customername}),'%') ]]>	
+		 </if>
+		 <if test="cleasestatus != null and cleasestatus != ''">
+				and s.cleasestatus=#{cleasestatus}
+	    </if>
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="customerid != null and customerid != ''">
+				and s.customerid=#{customerid}
+	    </if>
+	    <if test="penqitype != null and penqitype != ''">
+				and s.penqitype=#{penqitype}
+	    </if>
+		 order by s.cleaseid desc 
+	</select>
+	
+	
+	<select id="findById" resultType="businessClease"  parameterType="long">
+		SELECT 	s.*,
+		        p.customername,
+		        r.modelname,
+		        t.productName,
+		        u.productName penqi
+		FROM ckb_business_clease s
+		left join ckb_business_customer p on s.customerid=p.customerid
+		left join ckb_product_model r on s.modelid=r.modelid
+		left join ckb_product_product t on r.productid=t.productid
+		left join ckb_product_product u on u.productid=s.penqiid
+		where  s.cleaseid=#{cleaseid} 
+	</select>
+	
+	
+	
+	<insert id="save" parameterType="businessClease" 
+				useGeneratedKeys="true" keyProperty="cleaseid">
+		INSERT INTO ckb_business_clease
+            	(    customerid,
+		             branchshopid,
+		             modelid,
+		             cleaseprice,
+		             cleasestime,
+		             cleaseetime,
+		             floorid,
+		             cleaseposition,
+		             cleasestatus,
+		             penqiid,
+		             penqitype,
+		             floorinfo
+		             )
+		VALUES (
+		             #{customerid},
+		             #{branchshopid},
+		             #{modelid},
+		             #{cleaseprice},
+		             #{cleasestime},
+		             #{cleaseetime},
+		             #{floorid},
+		             #{cleaseposition},
+		             #{cleasestatus},
+		             #{penqiid},
+		             #{penqitype},
+		             #{floorinfo}
+		        )
+	</insert>
+	
+	<update id="update" parameterType="businessClease">
+		update ckb_business_clease
+		<set>
+			<if test="cleaseprice != null and cleaseprice !='' ">
+				cleaseprice=#{cleaseprice,jdbcType=DOUBLE},
+			</if>
+		</set>
+		where cleaseid=#{cleaseid,jdbcType=INTEGER}	
+	</update>
+	
+	
+</mapper>

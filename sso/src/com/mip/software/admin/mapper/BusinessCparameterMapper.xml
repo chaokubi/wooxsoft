@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="businessCparameterMapper" >
+
+	
+	<select id="findList" resultType="businessCparameter" parameterType="map">
+		SELECT 	s.*
+		FROM ckb_business_cparamet s
+		where 1=1
+		<if test="customerid != null and customerid != ''">
+			<![CDATA[ AND s.customerid=#{customerid} ]]>
+		 </if>
+		 order by s.cparametid desc 
+	</select>
+	
+	<select id="findById" resultType="businessCparameter"  parameterType="long">
+		SELECT 	s.*
+		FROM ckb_business_cparamet s
+		where  s.cparametid=#{cparametid} 
+	</select>
+	
+	
+	<insert id="save" parameterType="businessCparameter" 
+				useGeneratedKeys="true" keyProperty="cparametid">
+		INSERT INTO ckb_business_cparamet
+            	( cparametname,
+		             cparametdetail,
+		             cparametprice,
+		             cparametstatus,
+		             customerid,
+		             branchshopid
+		             )
+		VALUES (
+		        #{cparametname},
+		        #{cparametdetail},
+		        #{cparametprice},
+		        #{cparametstatus},
+		        #{customerid},
+		        #{branchshopid}
+		        )
+	</insert>
+	
+	<update id="update" parameterType="businessCparameter">
+		update ckb_business_cparamet
+		<set>
+			<if test="cparametname != null and cparametname != ''">
+				cparametname=#{cparametname,jdbcType=VARCHAR},
+			</if>
+			<if test="cparametdetail != null and cparametdetail != ''">
+				cparametdetail=#{cparametdetail,jdbcType=VARCHAR},
+			</if>
+			<if test="cparametprice != null and cparametprice != ''">
+				cparametprice=#{cparametprice,jdbcType=DOUBLE},
+			</if>
+			<if test="cparametstatus != null">
+				cparametstatus=#{cparametstatus,jdbcType=INTEGER},
+			</if>
+			<if test="customerid != null and customerid != ''">
+				customerid=#{customerid,jdbcType=INTEGER},
+			</if>
+			<if test="branchshopid != null and branchshopid != ''">
+				branchshopid=#{branchshopid,jdbcType=INTEGER},
+			</if>
+		</set>
+		where cparametid=#{cparametid,jdbcType=INTEGER}	
+	</update>
+	
+</mapper>

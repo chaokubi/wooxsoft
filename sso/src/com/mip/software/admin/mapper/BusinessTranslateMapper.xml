@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="businessTranslateMapper" >
+
+	<select id="findListPage" resultType="businessTranslate"  parameterType="dto">
+		SELECT 	s.*,
+		        p.ssouser_name,
+		        t.carno
+		FROM ckb_business_translate s
+		left join ckb_front_user p on s.frontuserid=p.ssouserid
+		left join ckb_sys_car t on s.carid=t.carid
+		where 1=1
+		<if test="queryCondition.ssouser_name != null and queryCondition.ssouser_name != ''">
+				<![CDATA[ and p.ssouser_name like CONCAT(CONCAT('%',#{queryCondition.ssouser_name}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.carno != null and queryCondition.carno != ''">
+				<![CDATA[ and s.carno like CONCAT(CONCAT('%',#{queryCondition.carno}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.branchshopid != null and queryCondition.branchshopid != ''">
+				and s.branchshopid=#{queryCondition.branchshopid}
+	    </if>
+	    <if test="queryCondition.isfinish != null and queryCondition.isfinish != ''">
+				and s.isfinish=#{queryCondition.isfinish}
+	    </if>
+	    order by s.translateid desc 
+	</select>
+	
+	<select id="findList" resultType="businessTranslate" parameterType="map">
+		SELECT 	s.*,
+		        p.ssouser_name,
+		        t.carno
+		FROM ckb_business_translate s
+		left join ckb_front_user p on s.frontuserid=p.ssouserid
+		left join ckb_sys_car t on s.carid=t.carid
+		where 1=1
+		 <if test="ssouser_name != null and  ssouser_name != ''">
+			<![CDATA[ and p.ssouser_name like CONCAT(CONCAT('%',#{ssouser_name}),'%') ]]>	
+		 </if>
+		 <if test="carno != null and  carno != ''">
+			<![CDATA[ and s.carno like CONCAT(CONCAT('%',#{carno}),'%') ]]>	
+		 </if>
+		<if test="branchshopid != null and branchshopid != ''">
+			<![CDATA[ AND s.branchshopid=#{branchshopid} ]]>
+		 </if>
+		 <if test="isfinish != null and isfinish != ''">
+			<![CDATA[ AND s.isfinish=#{isfinish} ]]>
+		 </if>
+		 order by s.translateid desc 
+	</select>
+	
+	<select id="findById" resultType="businessTranslate"  parameterType="long">
+		SELECT 	s.*,
+		        p.ssouser_name,
+		        t.carno
+		FROM ckb_business_translate s
+		left join ckb_front_user p on s.frontuserid=p.ssouserid
+		left join ckb_sys_car t on s.carid=t.carid
+		where  s.translateid=#{translateid} 
+	</select>
+	
+	
+	<insert id="save" parameterType="businessTranslate" 
+				useGeneratedKeys="true" keyProperty="translateid">
+		INSERT INTO ckb_business_translate
+            	( transdate,
+		             carid,
+		             frontuserid,
+		             jobstr,
+		             changinfoids,
+		             branchshopid,
+		             nochangeids
+		             )
+		VALUES (
+		        #{transdate},
+		        #{carid},
+		        #{frontuserid},
+		        #{jobstr},
+		        #{changinfoids},
+		        #{branchshopid},
+		        #{nochangeids}
+		        )
+	</insert>
+	
+	<update id="update" parameterType="businessTranslate">
+		update ckb_business_translate
+		<set>
+		    <if test="carid != null and carid != '' ">
+				carid=#{carid,jdbcType=INTEGER},
+			</if>
+			<if test="frontuserid != null and frontuserid != '' ">
+				frontuserid=#{frontuserid,jdbcType=INTEGER},
+			</if>
+			<if test="jobstr != null and jobstr != ''">
+				jobstr=#{jobstr,jdbcType=VARCHAR},
+			</if>
+			<if test="changinfoids != null and changinfoids != ''">
+				changinfoids=#{changinfoids,jdbcType=VARCHAR},
+			</if>
+			<if test="isfinish != null">
+				isfinish=#{isfinish,jdbcType=INTEGER},
+			</if>
+			<if test="totalnum != null  ">
+				totalnum=#{totalnum,jdbcType=INTEGER},
+			</if>
+			<if test="finishnum != null  ">
+				finishnum=#{finishnum,jdbcType=INTEGER},
+			</if>
+			<if test="notfinish != null  ">
+				notfinish=#{notfinish,jdbcType=INTEGER},
+			</if>
+			<if test="customers != null and customers != ''">
+				customers=#{customers,jdbcType=VARCHAR},
+			</if>
+			<if test="nochangeids != null and nochangeids != ''">
+				nochangeids=#{nochangeids,jdbcType=VARCHAR},
+			</if>
+			
+		</set>
+		where translateid=#{translateid,jdbcType=INTEGER}	
+	</update>
+	
+	<delete id="del" parameterType="long">
+		delete from ckb_business_translate where translateid=#{translateid}
+	</delete>
+	
+	<update id="updateOther" parameterType="map">
+		update ckb_business_translate 
+		set changinfoids=replace(changinfoids,#{translateid},0),
+		    totalnum=totalnum-1
+		where FIND_IN_SET(#{translateid},changinfoids) and isfinish=0	and branchshopid=#{branchshopid}
+	</update>
+	
+</mapper>

@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="businessChangeInfoMapper" >
+
+	
+	<select id="findListPage" resultType="businessChangeInfo"  parameterType="dto">
+		SELECT 	s.*,
+		        r.ssouser_name maintainame,
+		        p.customername,
+		        t.ssouser_name 
+		FROM ckb_business_changinfo s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		left join ckb_front_user t on p.frontuserid=t.ssouserid
+		where 1=1
+		<if test="queryCondition.customername != null and queryCondition.customername != ''">
+				<![CDATA[ and p.customername like CONCAT(CONCAT('%',#{queryCondition.customername}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.datestart != null and queryCondition.datestart != ''">
+				and s.adddate>=#{queryCondition.datestart}
+	    </if>
+	    <if test="queryCondition.dateend != null and queryCondition.dateend != ''">
+				and s.adddate &lt;=#{queryCondition.dateend}
+	    </if>
+	    <if test="queryCondition.branchshopid != null and queryCondition.branchshopid != ''">
+				and s.branchshopid=#{queryCondition.branchshopid}
+	    </if>
+	    <if test="queryCondition.customerid != null and queryCondition.customerid != ''">
+				and s.customerid=#{queryCondition.customerid}
+	    </if>
+	    <if test="queryCondition.changinfotype != null and queryCondition.changinfotype != ''">
+				and s.changinfotype=#{queryCondition.changinfotype}
+	    </if>
+	    <if test="queryCondition.changinfotypestr != null and queryCondition.changinfotypestr != ''">
+				and s.changinfotype in (${queryCondition.changinfotypestr})
+	    </if>
+	    <if test="queryCondition.changestatus != null and queryCondition.changestatus != ''">
+				and s.changestatus=#{queryCondition.changestatus}
+	    </if>
+	    <if test="queryCondition.changestatusstr != null and queryCondition.changestatusstr != ''">
+				and s.changestatus in (${queryCondition.changestatusstr})
+	    </if>
+	    order by s.changinfoid desc 
+	</select>
+	
+	<select id="findList" resultType="businessChangeInfo" parameterType="map">
+		SELECT 	s.*,
+		        r.ssouser_name,
+		        p.customername
+		FROM ckb_business_changinfo s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+		 <if test="customername != null and  customername != ''">
+			<![CDATA[ and s.customername like CONCAT(CONCAT('%',#{customername}),'%') ]]>	
+		 </if>
+		<if test="datestart != null and datestart != ''">
+				and s.adddate>=#{datestart}
+	    </if>
+	    <if test="dateend != null and dateend != ''">
+				and s.adddate &lt;=#{dateend}
+	    </if>
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="customerid != null and customerid != ''">
+				and s.customerid=#{customerid}
+	    </if>
+	    <if test="changinfotype != null and changinfotype != ''">
+				and s.changinfotype=#{changinfotype}
+	    </if>
+	    <if test="changinfotypestr != null and changinfotypestr != ''">
+				and s.changinfotype in (${changinfotypestr})
+	    </if>
+	    <if test="changestatus != null and changestatus != ''">
+				and s.changestatus=#{changestatus}
+	    </if>
+	    <if test="changestatusstr != null and changestatusstr != ''">
+				and s.changestatus in (${queryCondition.changestatusstr})
+	    </if>
+	    <if test="tznr != null and tznr != ''">
+				and s.tznr in (${tznr})
+	    </if>
+	    <if test="nocludeids != null and nocludeids != ''">
+				and FIND_IN_SET(s.changinfoid , (select case when group_concat(f.changinfoids) is not null then group_concat(f.changinfoids) else 0 end  from ckb_business_translate f where f.isfinish=0 and f.branchshopid=#{branchshopid}) )=0 
+	    </if>
+	    <if test="translateid != null and translateid != ''">
+				and FIND_IN_SET(s.changinfoid , (select f.changinfoids from ckb_business_translate f where f.translateid=#{translateid}) )
+	    </if>
+		 order by s.changinfoid desc 
+	</select>
+	
+	
+	<select id="findIsSelectList" resultType="businessChangeInfo" parameterType="map">
+		SELECT 	s.*,
+		        r.ssouser_name,
+		        p.customername,
+		        (select count(*) from ckb_business_translate f where find_in_set(s.changinfoid,f.changinfoids)>0 and f.translateid!=#{translateid}) isselect
+		FROM ckb_business_changinfo s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+		 <if test="customername != null and  customername != ''">
+			<![CDATA[ and s.customername like CONCAT(CONCAT('%',#{customername}),'%') ]]>	
+		 </if>
+		<if test="datestart != null and datestart != ''">
+				and s.adddate>=#{datestart}
+	    </if>
+	    <if test="dateend != null and dateend != ''">
+				and s.adddate &lt;=#{dateend}
+	    </if>
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="customerid != null and customerid != ''">
+				and s.customerid=#{customerid}
+	    </if>
+	    <if test="changinfotype != null and changinfotype != ''">
+				and s.changinfotype=#{changinfotype}
+	    </if>
+	    <if test="changinfotypestr != null and changinfotypestr != ''">
+				and s.changinfotype in (${changinfotypestr})
+	    </if>
+	    <if test="changestatus != null and changestatus != ''">
+				and s.changestatus=#{changestatus}
+	    </if>
+	    <if test="changestatusstr != null and changestatusstr != ''">
+				and s.changestatus in (${queryCondition.changestatusstr})
+	    </if>
+	    <if test="tznr != null and tznr != ''">
+				and s.tznr in (${tznr})
+	    </if>
+		 order by s.changinfoid desc 
+	</select>
+	
+	
+	<select id="findtypeHHList" resultType="businessChangeInfo" parameterType="map">
+		SELECT 	s.*,
+		        r.ssouser_name,
+		        p.customername,
+		        t.modelbz,
+                count(case when o.modelid is not null then 1 else 0 end) changenum
+		FROM ckb_business_changinfo s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		left join ckb_business_clease o on s.cleaseid=o.cleaseid
+		left join ckb_product_model t on o.modelid=t.modelid
+		where 1=1
+		 <if test="customername != null and  customername != ''">
+			<![CDATA[ and s.customername like CONCAT(CONCAT('%',#{customername}),'%') ]]>	
+		 </if>
+		<if test="datestart != null and datestart != ''">
+				and s.adddate>=#{datestart}
+	    </if>
+	    <if test="dateend != null and dateend != ''">
+				and s.adddate &lt;=#{dateend}
+	    </if>
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="customerid != null and customerid != ''">
+				and s.customerid=#{customerid}
+	    </if>
+	    <if test="changinfotype != null and changinfotype != ''">
+				and s.changinfotype=#{changinfotype}
+	    </if>
+	    <if test="changinfotypestr != null and changinfotypestr != ''">
+				and s.changinfotype in (${changinfotypestr})
+	    </if>
+	    <if test="changestatus != null and changestatus != ''">
+				and s.changestatus=#{changestatus}
+	    </if>
+	    <if test="changestatusstr != null and changestatusstr != ''">
+				and s.changestatus in (${queryCondition.changestatusstr})
+	    </if>
+	    <if test="tznr != null and tznr != ''">
+				and s.tznr in (${tznr})
+	    </if>
+	     <if test="nocludeids != null and nocludeids != ''">
+				and FIND_IN_SET(s.changinfoid , (select case when group_concat(f.changinfoids) is not null then group_concat(f.changinfoids) else 0 end from ckb_business_translate f where f.branchshopid=#{branchshopid}) )=0
+	    </if>
+	     group by o.modelid
+		 order by s.changinfoid desc 
+	</select>
+	
+	<select id="findtypePqList" resultType="businessChangeInfo" parameterType="map">
+		SELECT 	s.*,
+		        r.ssouser_name,
+		        p.customername,
+		        '' modelbz,
+                count(case when o.penqiid is not null then 1 else 0 end) changenum
+		FROM ckb_business_changinfo s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		left join ckb_business_clease o on s.cleaseid=o.cleaseid
+		where 1=1
+		 <if test="customername != null and  customername != ''">
+			<![CDATA[ and s.customername like CONCAT(CONCAT('%',#{customername}),'%') ]]>	
+		 </if>
+		<if test="datestart != null and datestart != ''">
+				and s.adddate>=#{datestart}
+	    </if>
+	    <if test="dateend != null and dateend != ''">
+				and s.adddate &lt;=#{dateend}
+	    </if>
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+	    <if test="customerid != null and customerid != ''">
+				and s.customerid=#{customerid}
+	    </if>
+	    <if test="changinfotype != null and changinfotype != ''">
+				and s.changinfotype=#{changinfotype}
+	    </if>
+	    <if test="changinfotypestr != null and changinfotypestr != ''">
+				and s.changinfotype in (${changinfotypestr})
+	    </if>
+	    <if test="changestatus != null and changestatus != ''">
+				and s.changestatus=#{changestatus}
+	    </if>
+	    <if test="changestatusstr != null and changestatusstr != ''">
+				and s.changestatus in (${queryCondition.changestatusstr})
+	    </if>
+	    <if test="tznr != null and tznr != ''">
+				and s.tznr in (${tznr})
+	    </if>
+	    <if test="nocludeids != null and nocludeids != ''">
+				and FIND_IN_SET(s.changinfoid , (select case when  group_concat(f.changinfoids) is not null then group_concat(f.changinfoids) else 0 end from ckb_business_translate f where f.branchshopid=#{branchshopid}) )=0
+	    </if>
+	     group by o.penqiid
+		 order by s.changinfoid desc 
+	</select>
+	
+	<select id="findChangeList" resultType="businessChangeInfo" parameterType="map">
+		select 
+		 distinct s.customerid,
+		 p.customername,
+		 p.customeraddress,
+		 (select count(*) from ckb_business_changinfo r where r.customerid=s.customerid and r.changinfotype in(1,3,4,5,6,8) and r.changestatus=3 and r.isfast=1) isfast,
+		 (select count(*) from ckb_business_changinfo r where r.customerid=s.customerid and r.changinfotype in(1,3,4,5,6,8) and r.changestatus=3) changenum
+		from ckb_business_changinfo s
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+	    <if test="branchshopid != null and branchshopid != ''">
+				and s.branchshopid=#{branchshopid}
+	    </if>
+		 order by s.changinfoid desc 
+	</select>
+	
+	<select id="findById" resultType="businessChangeInfo"  parameterType="long">
+		select s.*,
+		       t.customername,
+		       u.ssouser_name
+		from ckb_business_changinfo s
+		left join ckb_business_customer t on s.customerid=t.customerid
+		left join ckb_front_user u on s.frontuserid=u.ssouserid
+		where  s.changinfoid=#{changinfoid} 
+	</select>
+	
+	
+	
+	<insert id="save" parameterType="businessChangeInfo" 
+				useGeneratedKeys="true" keyProperty="changinfoid">
+		INSERT INTO ckb_business_changinfo
+            	(    changinfotype,
+		             branchshopid,
+		             customerid,
+		             cleaseid,
+		             tpinfo,
+		             ggtype,
+		             enviorreq,
+		             changereson,
+		             frontuserid,
+		             adddate,
+		             timereq,
+		             isfast,
+		             changestatus,
+		             outtype,
+		             temprice,
+		             noreson,
+		             oldcleaseid,
+		             oldproductmodel,
+		             newproductmodel,
+		             oldpenqiname,
+		             newpenqiname,
+		             oldposition,
+		             newposition,
+		             tznr
+		             )
+		VALUES (
+		             #{changinfotype},
+		             #{branchshopid},
+		             #{customerid},
+		             #{cleaseid},
+		             #{tpinfo},
+		             #{ggtype},
+		             #{enviorreq},
+		             #{changereson},
+		             #{frontuserid},
+		             now(),
+		             #{timereq},
+		             #{isfast},
+		             #{changestatus},
+		             #{outtype},
+		             #{temprice},
+		             #{noreson},
+		             #{oldcleaseid},
+		             #{oldproductmodel},
+		             #{newproductmodel},
+		             #{oldpenqiname},
+		             #{newpenqiname},
+		             #{oldposition},
+		             #{newposition},
+		             #{tznr}
+		        )
+	</insert>
+	
+	<update id="update" parameterType="businessChangeInfo">
+		update ckb_business_changinfo
+		<set>
+			<if test="changestatus != null and changestatus !='' ">
+				changestatus=#{changestatus,jdbcType=INTEGER},
+			</if>
+		</set>
+		where changinfoid=#{changinfoid,jdbcType=INTEGER}	
+	</update>
+	
+	<delete id="del" parameterType="long">
+		delete from ckb_business_changinfo where changinfoid=#{changinfoid}
+	</delete>
+	
+</mapper>

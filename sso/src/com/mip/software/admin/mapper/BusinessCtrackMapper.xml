@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="businessCtrackMapper" >
+
+	<select id="findListPage" resultType="businessCtrack"  parameterType="dto">
+		SELECT 	s.*,
+		        r.ssouser_name
+		FROM ckb_business_ctrack s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+	    <if test="queryCondition.customerid != null and queryCondition.customerid != ''">
+				and s.customerid=#{queryCondition.customerid}
+	    </if>
+	    order by s.ctrackid desc 
+	</select>
+	
+	<select id="findList" resultType="businessCtrack" parameterType="map">
+		SELECT 	s.*,
+		        r.ssouser_name
+		FROM ckb_business_ctrack s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where 1=1
+		<if test="customerid != null and customerid != ''">
+			<![CDATA[ AND s.customerid=#{customerid} ]]>
+		 </if>
+		 order by s.ctrackid desc 
+	</select>
+	
+	<select id="findById" resultType="businessCtrack"  parameterType="long">
+		SELECT 	s.*,
+		        r.ssouser_name
+		FROM ckb_business_ctrack s
+		left join ckb_front_user r on s.frontuserid=r.ssouserid
+		left join ckb_business_customer p on s.customerid=p.customerid
+		where  s.ctrackid=#{ctrackid} 
+	</select>
+	
+	
+	<insert id="save" parameterType="businessCtrack" 
+				useGeneratedKeys="true" keyProperty="ctrackid">
+		INSERT INTO ckb_business_ctrack
+            	( ctrackdate,
+		             ctrackresult,
+		             frontuserid,
+		             nextdate,
+		             customerid
+		             )
+		VALUES (
+		        now(),
+		        #{ctrackresult},
+		        #{frontuserid},
+		        #{nextdate},
+		        #{customerid}
+		        )
+	</insert>
+	
+	<update id="update" parameterType="businessCtrack">
+		update ckb_business_ctrack
+		<set>
+			<if test="ctrackresult != null and ctrackresult != ''">
+				ctrackresult=#{ctrackresult,jdbcType=VARCHAR},
+			</if>
+			<if test="nextdate != null and nextdate != ''">
+				nextdate=#{nextdate,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where ctrackid=#{ctrackid,jdbcType=INTEGER}	
+	</update>
+	
+	<delete id="del" parameterType="long">
+		delete from ckb_business_ctrack where ctrackid=#{ctrackid}
+	</delete>
+	
+</mapper>

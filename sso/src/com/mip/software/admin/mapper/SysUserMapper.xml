@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="sysUserMapper" >
+	
+    <select id="login" resultType="sysUser"  parameterType="sysUser">
+		select a.*,
+		     b.distrname,
+		     c.branchshopname
+		     from ckb_sys_user a 
+		     left join ckb_sys_distr b on a.distrid=b.distrid
+		     left join ckb_sys_branchshop c on a.branchshopid=c.branchshopid
+		     where a.user_login=#{user_login} 
+	</select>
+	
+	<select id="login2" resultType="sysUser"  parameterType="sysUser">
+		select a.*,
+		     b.distrname,
+		     c.branchshopname
+		     from ckb_sys_user a 
+		     left join ckb_sys_distr b on a.distrid=b.distrid
+		     left join ckb_sys_branchshop c on a.branchshopid=c.branchshopid
+		     where a.user_login=#{user_login} and a.user_status=1
+	</select>
+	
+	<update id="updateLastLogin" parameterType="map">
+		UPDATE ckb_sys_user s SET s.last_login_time=now() 
+			WHERE s.userid=#{userid}
+	</update>
+	
+	<select id="findListPage" resultType="sysUser"  parameterType="dto">
+		select a.*,
+		     b.distrname,
+		     c.branchshopname
+		     from ckb_sys_user a 
+		     left join ckb_sys_distr b on a.distrid=b.distrid
+		     left join ckb_sys_branchshop c on a.branchshopid=c.branchshopid
+		where 1=1 
+		<if test="queryCondition.user_login != null and queryCondition.user_login != ''">
+				<![CDATA[ and a.user_login like CONCAT(CONCAT('%',#{queryCondition.user_login}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.user_status != null and queryCondition.user_status != ''">
+				and a.user_status=#{queryCondition.user_status}
+	    </if>
+	    <if test="queryCondition.username != null and queryCondition.username != ''">
+				<![CDATA[ and a.username like CONCAT(CONCAT('%',#{queryCondition.username}),'%') ]]>	
+	    </if>
+	    <if test="queryCondition.distrid != null and queryCondition.distrid != ''">
+				and a.distrid=#{queryCondition.distrid}
+	    </if>
+	    <if test="queryCondition.branchshopid != null and queryCondition.branchshopid != ''">
+				and a.branchshopid=#{queryCondition.branchshopid}
+	    </if>
+	    order by a.userid desc 
+	</select>
+	
+	<select id="findList" resultType="sysUser" parameterType="map">
+		select a.*,
+		     b.distrname,
+		     c.branchshopname
+		     from ckb_sys_user a 
+		     left join ckb_sys_distr b on a.distrid=b.distrid
+		     left join ckb_sys_branchshop c on a.branchshopid=c.branchshopid
+		where 1=1 
+		 <if test="user_status != null and user_status != ''">
+			<![CDATA[ AND a.user_status=#{user_status} ]]>
+		 </if>
+		 order by a.create_time desc 
+	</select>
+	
+	
+	<select id="findById" resultType="sysUser"  parameterType="java.lang.Integer">
+		select a.*,
+		     b.distrname,
+		     c.branchshopname
+		     from ckb_sys_user a 
+		     left join ckb_sys_distr b on a.distrid=b.distrid
+		     left join ckb_sys_branchshop c on a.branchshopid=c.branchshopid
+		where a.userid=#{userid} 
+	</select>
+	
+	<insert id="save" parameterType="sysUser" 
+				useGeneratedKeys="true" keyProperty="userid">
+		INSERT INTO ckb_sys_user
+            	( user_login,
+		             user_pass,
+		             create_time,
+		             user_status,
+		             username,
+		             areaid,
+		             distrid,
+		             branchshopid)
+		VALUES (
+		        #{user_login},
+		        #{user_pass},
+		        now(),
+		        #{user_status},
+		        #{username},
+		        #{areaid},
+		        #{distrid},
+		        #{branchshopid})
+	</insert>
+	
+	<update id="update" parameterType="sysUser">
+		update ckb_sys_user
+		<set>
+			<if test="user_login != null and user_login != ''">
+				user_login=#{user_login,jdbcType=VARCHAR},
+			</if>
+			<if test="user_status != null">
+				user_status=#{user_status,jdbcType=INTEGER},
+			</if>
+			<if test="username != null and username != ''">
+				username=#{username,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where userid=#{userid,jdbcType=INTEGER}	
+	</update>
+	
+	<update id="updateUserStatus" parameterType="map">
+		update ckb_sys_user set user_status=#{user_status} where userid=#{userid}
+	</update>
+	
+	
+	<select id="userLoginIsExist" resultType="java.lang.Integer" parameterType="java.lang.String">
+		select count(*) from ckb_sys_user s where s.user_login=#{user_login} 
+	</select>
+	
+	<update id="updatePsd" parameterType="sysUser">
+		update ckb_sys_user s set s.user_pass=#{user_pass} where s.userid=#{userid}
+	</update>
+	
+</mapper>
